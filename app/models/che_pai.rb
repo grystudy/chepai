@@ -1,0 +1,2 @@
+class ChePai < ApplicationRecord
+end
