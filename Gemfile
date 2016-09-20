@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
+gem 'roo', '~> 2.5', '>= 2.5.1'
+gem 'pg'
 gem 'sidekiq'
 gem 'sidetiq'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'

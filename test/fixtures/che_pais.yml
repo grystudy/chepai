@@ -1,0 +1,27 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  source_id: 1
+  chepai: MyString
+  fadongji: MyString
+  chejia: MyString
+  x: MyString
+  city_code: 1
+  city_name: MyString
+  provience_code: 1
+  provience_name: MyString
+  time: MyString
+  time1: MyString
+
+two:
+  source_id: 1
+  chepai: MyString
+  fadongji: MyString
+  chejia: MyString
+  x: MyString
+  city_code: 1
+  city_name: MyString
+  provience_code: 1
+  provience_name: MyString
+  time: MyString
+  time1: MyString
