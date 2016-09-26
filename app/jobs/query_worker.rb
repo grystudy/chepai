@@ -8,7 +8,29 @@ class QueryWorker
 			return
 		end
 
-		puts UUChePai.all.length
+		UUChePai.all.each do |uuitem|
+			chepai = uuitem.chepai
+			next unless chepai.size > 3
+			pro = chepai[0]
+			city = chepai[1]
+			city_code = nil
+			car_head = ""
+			city_info[:configs].each do |pro_json|
+				city_item = pro_json.weizhang_pro_match(pro,city)
+				next unless city_item
+				city_code = city_item.weizhang_city_code
+				car_head = city_item.fetch :car_head,String.new
+				break
+			end
+			
+			next unless city_code		
+			weizhang_info = WeizhangInfo.new(city_code,chepai.gsub(car_head,''),uuitem.fadongji,uuitem.chejia)
+			response = weizhang_info.get
+			p response
+			if response.weizhang_response_ok?
+				break
+			end
+		end
 	end
 
 	private
@@ -21,5 +43,67 @@ class QueryWorker
 		ok = res.code.to_i == 200
 		return nil unless ok
 		eval(res.body)
+	end
+end
+
+class WeizhangInfo
+	require 'digest/md5'
+	include HTTParty
+	base_uri 'www.loopon.cn/traffic_violation/api/v1'
+
+	def initialize(city, chepai,fadongji,chejia)
+		src = "{plate_num=#{chepai}&body_num=#{chejia}&engine_num=#{fadongji}&city_id=#{city}&carType=02}"
+    @car_info = URI.encode(src).to_s
+  end
+
+	def get 
+		@data_hash = nil
+		car_info = @car_info
+		return nil unless @car_info
+		api_id = 2
+		app_key = "c1a0dc80-3699-0134-fb7d-00163e081329"
+		timestamp = Time.now.getutc.to_i
+		sign = Digest::MD5.hexdigest(api_id.to_s + car_info + timestamp.to_s + app_key)
+		p car_info
+		res = self.class.get("/query", {carinfo: car_info, api_id: api_id, sign: sign, timestamp: timestamp})
+		return nil if !res
+		res = eval(res.to_s)
+		return nil if !res
+		@data_hash = res
+	end
+
+	private
+	def is_valid?
+		@data_hash
+	end
+end
+
+class Hash
+	def	weizhang_pro_match(pro,city)
+		name = fetch :province_short_name,String.new
+		name.force_encoding 'UTF-8'
+		return nil unless name == pro
+		cities = fetch :citys,nil
+		return nil unless cities
+		cities.each do |city_v|
+			return city_v if city_v.weizhang_city_match city
+		end
+		nil
+	end
+
+	def weizhang_city_match city
+		name = fetch :car_head ,nil
+		return false unless name && name.size > 1
+		name.force_encoding 'UTF-8'
+		name[1] == city
+	end
+
+	def weizhang_city_code
+		fetch :city_id,nil
+	end
+
+	def weizhang_response_ok?
+		code = fetch :rspcode,nil
+		code == "20000"
 	end
 end
