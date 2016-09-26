@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
+gem 'httparty', '~> 0.13.7'
 gem 'roo', '~> 2.5', '>= 2.5.1'
 gem 'pg'
 gem 'sidekiq'

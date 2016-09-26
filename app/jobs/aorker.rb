@@ -2,7 +2,7 @@ class Aorker
   include Sidekiq::Worker
   include Sidetiq::Schedulable
 
-	recurrence {secondly(1) }
+	recurrence {secondly(3000) }
 
 	def perform
 		 puts "sidetip ttt"
@@ -10,5 +10,5 @@ class Aorker
 end
 
 module AA
-	Aorker.perform_async
+	#Aorker.perform_async
 end
