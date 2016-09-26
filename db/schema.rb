@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160920030518) do
+ActiveRecord::Schema.define(version: 20160923080421) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -27,6 +27,12 @@ ActiveRecord::Schema.define(version: 20160920030518) do
     t.string   "provience_name"
     t.datetime "time"
     t.datetime "time1"
+  end
+
+  create_table "uu_che_pais", force: :cascade do |t|
+    t.string "chepai"
+    t.string "fadongji"
+    t.string "chejia"
   end
 
 end

@@ -1,0 +1,2 @@
+class UUChePai < ApplicationRecord
+end
