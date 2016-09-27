@@ -14,17 +14,17 @@ class QueryWorker
 			pro = chepai[0]
 			city = chepai[1]
 			city_code = nil
-			car_head = ""
+			# car_head = ""
 			city_info[:configs].each do |pro_json|
 				city_item = pro_json.weizhang_pro_match(pro,city)
 				next unless city_item
 				city_code = city_item.weizhang_city_code
-				car_head = city_item.fetch :car_head,String.new
+				# car_head = city_item.fetch :car_head,String.new
 				break
 			end
 			
 			next unless city_code		
-			weizhang_info = WeizhangInfo.new(city_code,chepai.gsub(car_head,''),uuitem.fadongji,uuitem.chejia)
+			weizhang_info = WeizhangInfo.new(city_code,chepai,uuitem.fadongji,uuitem.chejia)
 			response = weizhang_info.get
 			p response
 			if response.weizhang_response_ok?
@@ -49,11 +49,15 @@ end
 class WeizhangInfo
 	require 'digest/md5'
 	include HTTParty
-	base_uri 'www.loopon.cn/traffic_violation/api/v1'
+	base_uri 'http://www.loopon.cn'
 
 	def initialize(city, chepai,fadongji,chejia)
-		src = "{plate_num=#{chepai}&body_num=#{chejia}&engine_num=#{fadongji}&city_id=#{city}&carType=02}"
-    @car_info = URI.encode(src).to_s
+		@chepai = chepai
+		s = "%26"
+		t = s
+		src = "{plate_num=#{chepai}#{t}body_num=#{chejia}#{t}engine_num=#{fadongji}#{t}city_id=#{city}#{t}car_type=02}"
+    @car_info = src.gsub(t,s)
+    @car_info = src
   end
 
 	def get 
@@ -64,9 +68,8 @@ class WeizhangInfo
 		app_key = "c1a0dc80-3699-0134-fb7d-00163e081329"
 		timestamp = Time.now.getutc.to_i
 		sign = Digest::MD5.hexdigest(api_id.to_s + car_info + timestamp.to_s + app_key)
-		p car_info
-		res = self.class.get("/query", {carinfo: car_info, api_id: api_id, sign: sign, timestamp: timestamp})
-		return nil if !res
+		res = self.class.get("/traffic_violation/api/v1/query",{query: {car_info: car_info, api_id: api_id, sign: sign, timestamp: timestamp}})
+		return nil if !res		
 		res = eval(res.to_s)
 		return nil if !res
 		@data_hash = res
