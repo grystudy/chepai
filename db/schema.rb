@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160923080421) do
+ActiveRecord::Schema.define(version: 20160927064338) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -27,12 +27,39 @@ ActiveRecord::Schema.define(version: 20160923080421) do
     t.string   "provience_name"
     t.datetime "time"
     t.datetime "time1"
+    t.integer  "plate_number_id"
+    t.index ["plate_number_id"], name: "index_che_pais_on_plate_number_id", using: :btree
+  end
+
+  create_table "plate_numbers", force: :cascade do |t|
+    t.string "name"
+    t.index ["name"], name: "index_plate_numbers_on_name", using: :btree
   end
 
   create_table "uu_che_pais", force: :cascade do |t|
-    t.string "chepai"
-    t.string "fadongji"
-    t.string "chejia"
+    t.string  "chepai"
+    t.string  "fadongji"
+    t.string  "chejia"
+    t.integer "plate_number_id"
+    t.index ["plate_number_id"], name: "index_uu_che_pais_on_plate_number_id", using: :btree
   end
 
+  create_table "weizhang_items", force: :cascade do |t|
+    t.text "info"
+  end
+
+  create_table "weizhang_items_queries", id: false, force: :cascade do |t|
+    t.integer "weizhang_item_id",  null: false
+    t.integer "weizhang_query_id", null: false
+  end
+
+  create_table "weizhang_queries", force: :cascade do |t|
+    t.integer  "plate_numbers_id"
+    t.datetime "time"
+    t.index ["plate_numbers_id"], name: "index_weizhang_queries_on_plate_numbers_id", using: :btree
+  end
+
+  add_foreign_key "che_pais", "plate_numbers"
+  add_foreign_key "uu_che_pais", "plate_numbers"
+  add_foreign_key "weizhang_queries", "plate_numbers", column: "plate_numbers_id"
 end

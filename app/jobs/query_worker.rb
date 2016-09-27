@@ -107,6 +107,6 @@ class Hash
 
 	def weizhang_response_ok?
 		code = fetch :rspcode,nil
-		code == "20000"
+		code == 20000
 	end
 end
