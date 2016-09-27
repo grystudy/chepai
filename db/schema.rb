@@ -54,12 +54,12 @@ ActiveRecord::Schema.define(version: 20160927064338) do
   end
 
   create_table "weizhang_queries", force: :cascade do |t|
-    t.integer  "plate_numbers_id"
+    t.integer  "plate_number_id"
     t.datetime "time"
-    t.index ["plate_numbers_id"], name: "index_weizhang_queries_on_plate_numbers_id", using: :btree
+    t.index ["plate_number_id"], name: "index_weizhang_queries_on_plate_number_id", using: :btree
   end
 
   add_foreign_key "che_pais", "plate_numbers"
   add_foreign_key "uu_che_pais", "plate_numbers"
-  add_foreign_key "weizhang_queries", "plate_numbers", column: "plate_numbers_id"
+  add_foreign_key "weizhang_queries", "plate_numbers"
 end
