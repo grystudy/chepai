@@ -14,23 +14,41 @@ class QueryWorker
 			pro = chepai[0]
 			city = chepai[1]
 			city_code = nil
-			# car_head = ""
 			city_info[:configs].each do |pro_json|
 				city_item = pro_json.weizhang_pro_match(pro,city)
 				next unless city_item
 				city_code = city_item.weizhang_city_code
-				# car_head = city_item.fetch :car_head,String.new
 				break
-			end
-			
+			end			
 			next unless city_code		
-			weizhang_info = WeizhangInfo.new(city_code,chepai,uuitem.fadongji,uuitem.chejia)
-			response = weizhang_info.get
-			p response
-			if response.weizhang_response_ok?
-				break
+			plate_num = get_plate_number_item chepai
+			next unless plate_num.need_requery?
+			response = WeizhangInfo.new(city_code,chepai,uuitem.fadongji,uuitem.chejia).get
+			rspcode = response.weizhang_response_code
+			if rspcode
+				p "#{chepai} #{rspcode}"
+				new_query = plate_num.weizhang_queries.create(time: DateTime.now)
+				his_array = response.weizhang_histories
+				new_weizhang_item = his_array.select do |res_item_|
+					!plate_num.weizhang_queries.to_a.index do |q_|
+						q_.weizhang_items.to_a.index do |i_|
+							i_.info == res_item_.to_json
+							p 'found same  !!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+						end
+					end
+				end
+				new_weizhang_item.each do |i_|
+					p "weizhang save !!!!!!!!!!!!!!!"
+					new_query.weizhang_items.create(info: i_.to_json)
+				end
 			end
 		end
+	end
+
+	def get_plate_number_item full_chepai
+		item = PlateNumber.where(name: full_chepai).take
+		item = PlateNumber.create(name:full_chepai) unless item
+		item
 	end
 
 	private
@@ -52,11 +70,8 @@ class WeizhangInfo
 	base_uri 'http://www.loopon.cn'
 
 	def initialize(city, chepai,fadongji,chejia)
-		@chepai = chepai
-		s = "%26"
-		t = s
+		t = "%26"
 		src = "{plate_num=#{chepai}#{t}body_num=#{chejia}#{t}engine_num=#{fadongji}#{t}city_id=#{city}#{t}car_type=02}"
-    @car_info = src.gsub(t,s)
     @car_info = src
   end
 
@@ -105,8 +120,12 @@ class Hash
 		fetch :city_id,nil
 	end
 
-	def weizhang_response_ok?
+	def weizhang_response_code
 		code = fetch :rspcode,nil
-		code == 20000
+		code
+	end
+
+	def weizhang_histories
+		fetch :historys,[]
 	end
 end
