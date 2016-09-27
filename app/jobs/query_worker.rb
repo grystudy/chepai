@@ -22,6 +22,8 @@ class QueryWorker
 			end			
 			next unless city_code		
 			plate_num = get_plate_number_item chepai
+			uuitem.plate_number = plate_num
+			uuitem.save!
 			next unless plate_num.need_requery?
 			response = WeizhangInfo.new(city_code,chepai,uuitem.fadongji,uuitem.chejia).get
 			rspcode = response.weizhang_response_code
@@ -40,6 +42,13 @@ class QueryWorker
 				new_weizhang_item.each do |i_|
 					p "weizhang save !!!!!!!!!!!!!!!"
 					new_query.weizhang_items.create(info: i_.to_json)
+				end
+
+				info_ok = (rspcode == 20000 || rspcode == 21000) ? 1 : 2
+				if uuitem.ftf != info_ok
+					uuitem.ftf = info_ok
+					uuitem.save!
+					p "uu ftf#{info_ok}"
 				end
 			end
 		end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160927064338) do
+ActiveRecord::Schema.define(version: 20160927090458) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -28,6 +28,7 @@ ActiveRecord::Schema.define(version: 20160927064338) do
     t.datetime "time"
     t.datetime "time1"
     t.integer  "plate_number_id"
+    t.boolean  "ftf"
     t.index ["plate_number_id"], name: "index_che_pais_on_plate_number_id", using: :btree
   end
 
@@ -41,6 +42,7 @@ ActiveRecord::Schema.define(version: 20160927064338) do
     t.string  "fadongji"
     t.string  "chejia"
     t.integer "plate_number_id"
+    t.boolean "ftf"
     t.index ["plate_number_id"], name: "index_uu_che_pais_on_plate_number_id", using: :btree
   end
 
