@@ -7,49 +7,101 @@ class QueryWorker
 			puts 'no cityinfo response'
 			return
 		end
-
+		city_info = city_info[:configs]
+		bus = []
+		max_count = 6
 		UUChePai.all.each do |uuitem|
 			chepai = uuitem.chepai
 			next unless chepai.size > 3
-			pro = chepai[0]
-			city = chepai[1]
-			city_code = nil
-			city_info[:configs].each do |pro_json|
-				city_item = pro_json.weizhang_pro_match(pro,city)
-				next unless city_item
-				city_code = city_item.weizhang_city_code
-				break
-			end			
-			next unless city_code		
-			plate_num = get_plate_number_item chepai
-			uuitem.plate_number = plate_num
-			uuitem.save!
-			next unless plate_num.need_requery?
-			response = WeizhangInfo.new(city_code,chepai,uuitem.fadongji,uuitem.chejia).get
-			rspcode = response.weizhang_response_code
-			if rspcode
-				p "#{chepai} #{rspcode}"
-				new_query = plate_num.weizhang_queries.create(time: DateTime.now)
-				his_array = response.weizhang_histories
-				new_weizhang_item = his_array.select do |res_item_|
-					!plate_num.weizhang_queries.to_a.index do |q_|
-						q_.weizhang_items.to_a.index do |i_|
-							i_.info == res_item_.to_json
-							p 'found same  !!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+			bus << {no: chepai , entity: uuitem}
+			if bus.size == max_count
+				go(bus,city_info)
+				bus.clear
+			end
+		end
+		go(bus,city_info) unless bus.size == 0
+		bus.clear
+
+		ChePai.all.each do |uuitem|
+			p_short_name = uuitem.weizhang_provience_get_short_name uuitem.provience_name
+			next unless p_short_name
+			chepai = p_short_name + uuitem.chepai
+			next unless chepai.size > 3
+			bus << {no: chepai , entity: uuitem}
+			if bus.size == max_count
+				go(bus,city_info)
+				bus.clear
+			end
+		end
+		go(bus,city_info) unless bus.size == 0
+		bus.clear
+	end
+
+	$s_lock = Mutex.new
+	def go array_hash,city_info
+		a_thread = []
+		array_hash.each do |v|
+			chepai = v[:no]
+			uuitem = v[:entity]
+			a_thread << Thread.new do
+				pro = chepai[0]
+				city = chepai[1]
+				city_code = nil
+				city_info.each do |pro_json|
+					city_item = pro_json.weizhang_provience_match(pro,city)
+					next unless city_item
+					city_code = city_item.weizhang_city_code
+					break
+				end
+				Thread.exit unless city_code
+				plate_num = nil
+				$s_lock.synchronize do
+					plate_num = get_plate_number_item chepai
+					uuitem.plate_number = plate_num
+					uuitem.save!
+					Thread.exit unless plate_num.need_requery?
+				end
+				begin
+					response = WeizhangInfo.new(city_code,chepai,uuitem.fadongji,uuitem.chejia).get
+				rescue
+					Thread.exit
+				end
+				rspcode = response.weizhang_response_code
+				if rspcode
+					p "#{chepai} #{rspcode} #{Thread.current}"
+					$s_lock.synchronize do
+						new_query = plate_num.weizhang_queries.create(time: DateTime.now)
+						his_array = response.weizhang_histories
+						new_weizhang_item = his_array.select do |res_item_|
+							!plate_num.weizhang_queries.to_a.index do |q_|
+								q_.weizhang_items.to_a.index do |i_|
+									i_.info == res_item_.to_json
+									p 'found same  !!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+								end
+							end
+						end
+						new_weizhang_item.each do |i_|
+							p "weizhang save !!!!!!!!!!!!!!!"
+							new_query.weizhang_items.create(info: i_.to_json)
+						end
+						case rspcode
+							when 20000, 21000
+								ftf = 1
+							when 50101
+								ftf = 3
+							else
+								ftf = 2
+						end
+						if uuitem.ftf != ftf
+							uuitem.ftf = ftf
+							uuitem.save!
+							p "uu ftf#{ftf}"
 						end
 					end
 				end
-				new_weizhang_item.each do |i_|
-					p "weizhang save !!!!!!!!!!!!!!!"
-					new_query.weizhang_items.create(info: i_.to_json)
-				end
-
-				info_ok = (rspcode == 20000 || rspcode == 21000) ? 1 : 2
-				if uuitem.ftf != info_ok
-					uuitem.ftf = info_ok
-					uuitem.save!
-					p "uu ftf#{info_ok}"
-				end
+			end
+			a_thread.each do |thread|
+				thread.join
 			end
 		end
 	end
@@ -105,8 +157,19 @@ class WeizhangInfo
 	end
 end
 
+class Array
+	def weizhang_provience_get_short_name name_
+		each do |hash|
+			name = hash.fetch :province_name,String.new
+			name.force_encoding 'UTF-8'
+			return hash.fetch :province_short_name,nil if name == name_
+		end
+		nil
+	end
+end
+
 class Hash
-	def	weizhang_pro_match(pro,city)
+	def	weizhang_provience_match(pro,city)
 		name = fetch :province_short_name,String.new
 		name.force_encoding 'UTF-8'
 		return nil unless name == pro
