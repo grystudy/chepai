@@ -9,7 +9,7 @@ class QueryWorker
 		end
 		city_info = city_info[:configs]
 		bus = []
-		max_count = 6
+		max_count = 16
 		UUChePai.all.each do |uuitem|
 			chepai = uuitem.chepai
 			next unless chepai.size > 3
@@ -56,7 +56,7 @@ class QueryWorker
 				Thread.exit unless city_code
 				plate_num = nil
 				$s_lock.synchronize do
-					plate_num = get_plate_number_item chepai
+					plate_num = uuitem.plate_number || get_plate_number_item(chepai)
 					uuitem.plate_number = plate_num
 					uuitem.save!
 					Thread.exit unless plate_num.need_requery?
