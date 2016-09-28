@@ -23,7 +23,7 @@ class QueryWorker
 		bus.clear
 
 		ChePai.all.each do |uuitem|
-			p_short_name = uuitem.weizhang_provience_get_short_name uuitem.provience_name
+			p_short_name = city_info.weizhang_provience_get_short_name uuitem.provience_name
 			next unless p_short_name
 			chepai = p_short_name + uuitem.chepai
 			next unless chepai.size > 3
