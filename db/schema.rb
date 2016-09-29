@@ -28,7 +28,7 @@ ActiveRecord::Schema.define(version: 20160927090458) do
     t.datetime "time"
     t.datetime "time1"
     t.integer  "plate_number_id"
-    t.boolean  "ftf"
+    t.integer  "ftf"
     t.index ["plate_number_id"], name: "index_che_pais_on_plate_number_id", using: :btree
   end
 
@@ -42,7 +42,7 @@ ActiveRecord::Schema.define(version: 20160927090458) do
     t.string  "fadongji"
     t.string  "chejia"
     t.integer "plate_number_id"
-    t.boolean "ftf"
+    t.integer "ftf"
     t.index ["plate_number_id"], name: "index_uu_che_pais_on_plate_number_id", using: :btree
   end
 
