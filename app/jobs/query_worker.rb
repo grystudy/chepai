@@ -63,7 +63,8 @@ class QueryWorker
 				end
 				begin
 					response = WeizhangInfo.new(city_code,chepai,uuitem.fadongji,uuitem.chejia).get
-				rescue
+				rescue ex_
+					p "exception !!!!!!!!!!!!!!!!!!!!!!  #{ex_.message}"
 					Thread.exit
 				end
 				rspcode = response.weizhang_response_code
