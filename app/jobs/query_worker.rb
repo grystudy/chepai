@@ -59,7 +59,10 @@ class QueryWorker
 					plate_num = uuitem.plate_number || get_plate_number_item(chepai)
 					uuitem.plate_number = plate_num
 					uuitem.save!
-					Thread.exit unless plate_num.need_requery?
+					unless plate_num.need_requery?
+						p "#{plate_num.name}  not need to requery"
+						Thread.exit
+					end
 				end
 				begin
 					response = WeizhangInfo.new(city_code,chepai,uuitem.fadongji,uuitem.chejia).get
