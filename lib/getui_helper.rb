@@ -5,20 +5,25 @@ class GetuiHelper
 	@cid_1 = '359ecfc2eedfef72081c29076faacc3b'
 	@pusher = IGeTui.pusher(@app_id, @app_key, @master_secret)
 	@client_1 = IGeTui::Client.new(@cid_1)
+	$s_lock = Mutex.new
 
 	class << self
 		def notificate title,text
-			single_message = IGeTui::SingleMessage.new
-			template = IGeTui::NotificationTemplate.new
-			template.logo = 'push.png'
-			template.logo_url = 'http://www.igetui.com/wp-content/uploads/2013/08/logo_getui1.png'
-			template.title = title
-			template.text = text
-			template.set_push_info("open", 4, "message", "")
+			$s_lock.synchronize do
+				single_message = IGeTui::SingleMessage.new
+				template = IGeTui::NotificationTemplate.new
+				template.logo = 'push.png'
+				template.logo_url = 'http://www.igetui.com/wp-content/uploads/2013/08/logo_getui1.png'
+				template.title = title
+				template.text = text
+				template.set_push_info("open", 4, "message", "")
 
-			single_message.data = template
-			ret = @pusher.push_message_to_single(single_message, @client_1)
-			ret["result"] == "ok"
+				single_message.data = template
+				singleMessage.isOffline = true
+				singleMessage.offlineExpireTime= 24 * 3600 * 1000
+				ret = @pusher.push_message_to_single(single_message, @client_1)
+				ret["result"] == "ok"
+			end
 		end
 	end
 end
