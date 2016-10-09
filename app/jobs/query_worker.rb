@@ -69,8 +69,10 @@ class QueryWorker
 				end
 				begin
 					response = WeizhangInfo.new(city_code,chepai,uuitem.fadongji,uuitem.chejia).get
-				rescue ex_
+				rescue Exception => ex_
 					p "exception !!!!!!!!!!!!!!!!!!!!!!  #{ex_.message}"
+					GetuiHelper.notificate '网络发生异常',''
+					retry
 					Thread.exit
 				end
 				rspcode = response.weizhang_response_code
