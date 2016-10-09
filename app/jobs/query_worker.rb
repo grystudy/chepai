@@ -1,6 +1,9 @@
+require 'getui_helper.rb'
+
 class QueryWorker
 	include Sidekiq::Worker
 	def perform(name, count)
+		GetuiHelper.notificate '开始全遍历',''
 		uri = $city_info_uri
 		city_info = get_res_hash uri
 		unless city_info
@@ -84,6 +87,8 @@ class QueryWorker
 								end
 							end
 						end
+
+						GetuiHelper.notificate 'save',"#{new_weizhang_item.size}个" if new_weizhang_item.size > 0
 						new_weizhang_item.each do |i_|
 							p "weizhang save !!!!!!!!!!!!!!!"
 							new_query.weizhang_items.create(info: i_.to_json)
