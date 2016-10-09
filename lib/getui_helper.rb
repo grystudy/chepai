@@ -19,8 +19,8 @@ class GetuiHelper
 				template.set_push_info("open", 4, "message", "")
 
 				single_message.data = template
-				singleMessage.isOffline = true
-				singleMessage.offlineExpireTime= 24 * 3600 * 1000
+				single_message.is_offline = true
+				single_message.offline_expire_time= 24 * 3600 * 1000
 				ret = @pusher.push_message_to_single(single_message, @client_1)
 				ret["result"] == "ok"
 			end

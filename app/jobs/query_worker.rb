@@ -72,6 +72,7 @@ class QueryWorker
 				rescue Exception => ex_
 					p "exception !!!!!!!!!!!!!!!!!!!!!!  #{ex_.message}"
 					GetuiHelper.notificate '网络发生异常',''
+					sleep(30)
 					retry
 					Thread.exit
 				end
