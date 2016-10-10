@@ -120,8 +120,8 @@ class WeizhangInfo
 	base_uri 'http://www.loopon.cn'
 
 	def initialize(city=nil, chepai=nil,fadongji=nil,chejia=nil)
-		t = "%26"
-		src = "{plate_num=#{chepai}#{t}body_num=#{chejia}#{t}engine_num=#{fadongji}#{t}city_id=#{city}#{t}car_type=02}"
+		t = ","
+		src = "{plate_num:#{chepai}#{t}body_num:#{chejia}#{t}engine_num:#{fadongji}#{t}city_id:#{city}#{t}car_type:02}"
 		@car_info = src
 	end
 
