@@ -74,10 +74,15 @@ class QueryHelper
 							new_query = plate_num.weizhang_queries.create(time: DateTime.now)
 							his_array = response.weizhang_histories
 							new_weizhang_item = his_array.select do |res_item_|
+								json_ = res_item_.to_json
 								!plate_num.weizhang_queries.to_a.index do |q_|
 									q_.weizhang_items.to_a.index do |i_|
-										i_.info == res_item_.to_json
-										p 'found same  !!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+										same = i_.info == json_
+										if same
+											new_query.weizhang_items<< i_
+											p 'found same  !!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+										end
+										same
 									end
 								end
 							end
