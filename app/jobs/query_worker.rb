@@ -22,6 +22,7 @@ class QueryWorker
 	def perform(name, count)
 		zhunde  = WeizhangItem.all
 		p zhunde.class
+
 		# dop = []
 		# zhunde.each do |variable|
 		# 	li = []
@@ -51,7 +52,11 @@ class QueryWorker
 			return
 		end
 		city_info = city_info[:configs]
-		QueryHelper.loop UUChePai.all,city_info
-		QueryHelper.loop(ChePai.all,city_info) { |uuitem| city_info.weizhang_provience_get_short_name uuitem.provience_name }
+		items = UUChePai.where(ftf: [nil]).all
+		p items.size
+		QueryHelper.loop items,city_info
+		items = ChePai.where(ftf: [nil]).all
+		p items.size
+		QueryHelper.loop(items,city_info) { |uuitem| city_info.weizhang_provience_get_short_name uuitem.provience_name }
 	end
 end

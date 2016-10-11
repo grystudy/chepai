@@ -41,7 +41,6 @@ class QueryHelper
 						city_code = city_item.weizhang_city_code
 						break
 					end
-					Thread.exit unless city_code
 					plate_num = nil
 					$s_lock.synchronize do
 						plate_num = uuitem.plate_number 
@@ -49,6 +48,10 @@ class QueryHelper
 							plate_num = get_plate_number_item(chepai)
 							uuitem.plate_number = plate_num
 							uuitem.save!
+						end
+						unless city_code
+							set_ftf uuitem,0
+							Thread.exit
 						end
 						unless plate_num.need_requery?
 							p "#{plate_num.name}  not need to requery"
@@ -92,17 +95,13 @@ class QueryHelper
 							else
 								ftf = 2
 							end
-							if uuitem.ftf != ftf
-								uuitem.ftf = ftf
-								uuitem.save!
-								p "uu ftf#{ftf}"
-							end
+							set_ftf uuitem,ftf
 						end
 					end
 				end
-				a_thread.each do |thread|
-					thread.join
-				end
+			end			
+			a_thread.each do |thread|
+				thread.join
 			end
 		end
 
@@ -110,6 +109,14 @@ class QueryHelper
 			item = PlateNumber.where(name: full_chepai).take
 			item = PlateNumber.create(name:full_chepai) unless item
 			item
+		end
+
+		def set_ftf uuitem,ftf
+			if !uuitem.ftf || uuitem.ftf != ftf
+				p "ftf from #{uuitem.ftf} to #{ftf}"
+				uuitem.ftf = ftf
+				uuitem.save!
+			end
 		end
 	end
 end
