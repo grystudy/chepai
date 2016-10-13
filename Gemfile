@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
+gem 'rack-cors', :require => 'rack/cors'
 gem 'igetui-ruby', require: 'igetui'
 gem 'httparty', '~> 0.13.7'
 gem 'roo', '~> 2.5', '>= 2.5.1'
