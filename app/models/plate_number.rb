@@ -7,6 +7,6 @@ class PlateNumber < ApplicationRecord
   def need_requery?
   	last_query = weizhang_queries.order(time: :desc).first
     return true unless last_query
-    (DateTime.now - last_query.time.to_datetime).abs.to_f > 0
+    (DateTime.now - last_query.time.to_datetime).abs.to_f > 6
   end
 end

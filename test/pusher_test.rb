@@ -1,6 +1,6 @@
 require 'minitest/autorun'
 
-class PusherTest < MiniTest::Unit::TestCase
+class PusherTest < MiniTest::Test
 
   # before run test, you need to change the variables in setup method.
   def setup
