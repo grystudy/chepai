@@ -7,7 +7,8 @@
 #   Character.create(name: 'Luke', movie: movies.first)
 
 require 'roo'
-def ReadExcel(fileName,sheet_index)
+
+def ReadExcel(fileName, sheet_index)
   xlsx = Roo::Spreadsheet.open(fileName)
   lines=[]
   p xlsx.sheets
@@ -15,8 +16,8 @@ def ReadExcel(fileName,sheet_index)
   (sheet.first_row .. sheet.last_row).each do |row_no|
     row_a = []
     (sheet.first_column .. sheet.last_column).each do |col_no|
-      cv = sheet.cell(row_no,col_no)
-      next unless cv
+      cv = sheet.cell(row_no, col_no)
+      # next unless cv
       row_a << cv
     end
     lines << row_a
@@ -46,25 +47,39 @@ end
 
 # p hash_array.length
 # ChePai.create hash_array
-# fp= '/home/aa/myGit/backup/schedule_job'
-source_name = File.join(Rails.root,"cars.xlsx")
-# source_name = File.join(fp,"cars.xlsx")
-res = ReadExcel(source_name,0)
+
+source_name = File.join(Rails.root, "cars.xlsx")
+res = ReadExcel(source_name, 0)
 hash_array = []
-res.each_with_index do |line,index_|
-	line = line[0]
-	next unless line
-	next unless line.class == String
-	next if line.include? "\n"
-	line = line.split ","
-	next unless line.length == 2 || line.size == 3
-	next unless line[0].size > 0
-	# p line
-	next if index_ == 0 
-	hash_array << {chepai:line[0],
-		fadongji:line[2],
-		chejia:line[1]
-		}
+add_uu_chepai = lambda do |i_|
+  return unless i_
+  p i_
+  hash_array << {chepai: i_[0],
+                 fadongji: i_[2],
+                 chejia: i_[1]}
+end
+str_to_uu = lambda do |str_|
+  return nil unless str_
+  str_ = str_.delete("\n").delete("\"")
+  line = str_.split ","
+  return nil unless line.length == 2 || line.size == 3
+  return nil unless line[0].size > 0
+  line
+end
+res.each_with_index do |line, index_|
+  next if index_ == 0
+  line = line[0]
+  next unless line
+  next unless line.class == String
+  if line.include? "\n"
+    p line
+    items = line.split("\r\n")
+    items.each do |each_i_|
+      add_uu_chepai.call(str_to_uu.call(each_i_))
+    end
+  else
+    add_uu_chepai.call(str_to_uu.call(line))
+  end
 end
 
 p hash_array.length
