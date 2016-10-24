@@ -52,10 +52,10 @@ class QueryWorker
 			return
 		end
 		city_info = city_info[:configs]
-		# items = UUChePai.where(ftf: [nil]).all
-		# p items.size
-		# QueryHelper.loop items,city_info
-		items = ChePai.where(ftf: [nil]).all
+		items = UUChePai.all
+		p items.size
+		QueryHelper.loop items,city_info
+		items = ChePai.all
 		p items.size
 		QueryHelper.loop(items,city_info) { |uuitem| city_info.weizhang_provience_get_short_name uuitem.provience_name }
 	end
