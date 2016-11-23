@@ -20,6 +20,12 @@ class QueryWorker
 	end 
 
 	def perform(name, count)
+
+		chuanA =  UUChePai.where("chepai like  '川%'").all
+		Write('chuan',[[chuanA.to_json]])
+		chongqing = UUChePai.where("chepai like  '渝%'").all
+		Write('渝',[[chongqing.to_json]])
+		return
 		zhunde  = WeizhangItem.all
 		p zhunde.class
 
